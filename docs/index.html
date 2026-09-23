@@ -16,7 +16,6 @@
       --faint: #8f8c85;
       --accent: #1b4d3e;
       --accent-soft: #e8efe9;
-      --star: #a dig;
       --danger: #8b2e2e;
       --font-display: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
       --font-body: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -793,7 +792,7 @@
           if (filter === 'inbox' && (b.archived || false)) return false
           if (filter === 'unread' && (b.archived || b.status !== 'unread')) return false
           if (filter === 'read' && (b.archived || b.status !== 'read')) return false
-          if (filter === 'favorite' && !b.favorite) return false
+          if (filter === 'favorite' && (!b.favorite || b.archived)) return false
           if (filter === 'archived' && !b.archived) return false
           if (!needle) return true
           return (b.title + ' ' + b.host + ' ' + b.url).toLowerCase().indexOf(needle) !== -1
