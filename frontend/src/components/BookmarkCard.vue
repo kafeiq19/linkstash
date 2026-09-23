@@ -39,7 +39,7 @@ function startEdit() {
 async function saveEdit() {
   try {
     await store.update(props.bookmark.id, {
-      title: draftTitle.value.trim() || props.bookmark.title || '',
+      title: draftTitle.value.trim(),
       note: draftNote.value,
     })
     editing.value = false

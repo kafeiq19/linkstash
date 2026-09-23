@@ -16,17 +16,22 @@ public interface BookmarkMapper extends BaseMapper<Bookmark> {
             <script>
             SELECT b.* FROM bookmark b
             WHERE b.user_id = #{userId}
-            <if test="status != null and status != ''">
-              AND b.status = #{status}
-            </if>
+            <choose>
+              <when test="status != null and status != '' and status != 'inbox'">
+                AND b.status = #{status}
+              </when>
+              <otherwise>
+                AND b.status != 'archived'
+              </otherwise>
+            </choose>
             <if test="favorite != null">
               AND b.favorite = #{favorite}
             </if>
             <if test="q != null and q != ''">
               AND (
-                IFNULL(b.title,'') LIKE '%' || #{q} || '%'
-                OR IFNULL(b.description,'') LIKE '%' || #{q} || '%'
-                OR IFNULL(b.url,'') LIKE '%' || #{q} || '%'
+                IFNULL(b.title,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
+                OR IFNULL(b.description,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
+                OR IFNULL(b.url,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
               )
             </if>
             <if test="tagName != null and tagName != ''">
@@ -52,17 +57,22 @@ public interface BookmarkMapper extends BaseMapper<Bookmark> {
             <script>
             SELECT COUNT(*) FROM bookmark b
             WHERE b.user_id = #{userId}
-            <if test="status != null and status != ''">
-              AND b.status = #{status}
-            </if>
+            <choose>
+              <when test="status != null and status != '' and status != 'inbox'">
+                AND b.status = #{status}
+              </when>
+              <otherwise>
+                AND b.status != 'archived'
+              </otherwise>
+            </choose>
             <if test="favorite != null">
               AND b.favorite = #{favorite}
             </if>
             <if test="q != null and q != ''">
               AND (
-                IFNULL(b.title,'') LIKE '%' || #{q} || '%'
-                OR IFNULL(b.description,'') LIKE '%' || #{q} || '%'
-                OR IFNULL(b.url,'') LIKE '%' || #{q} || '%'
+                IFNULL(b.title,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
+                OR IFNULL(b.description,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
+                OR IFNULL(b.url,'') LIKE '%' || #{q} || '%' ESCAPE '\\'
               )
             </if>
             <if test="tagName != null and tagName != ''">

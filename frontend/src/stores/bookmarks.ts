@@ -32,13 +32,17 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     if (tag.value) query.tag = tag.value
     if (q.value) query.q = q.value
 
+    // API accepts only unread|read|archived; 'all' means non-archived (omit status)
+    const concreteStatus =
+      status.value === 'all' ? undefined : (status.value as 'unread' | 'read' | 'archived')
+
     if (mode.value === 'archived') {
       query.status = 'archived'
     } else if (mode.value === 'favorites') {
       query.favorite = true
-      query.status = status.value === 'archived' ? 'archived' : status.value
-    } else {
-      query.status = status.value
+      if (concreteStatus) query.status = concreteStatus
+    } else if (concreteStatus) {
+      query.status = concreteStatus
     }
     return query
   }
@@ -144,10 +148,15 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   async function update(id: number, body: UpdateBookmarkBody) {
     const updated = await bookmarksApi.updateBookmark(id, body)
     // status changes may push item out of current filter — refetch
+    const statusFilterMismatch =
+      (status.value === 'unread' && updated.status !== 'unread') ||
+      (status.value === 'read' && updated.status !== 'read') ||
+      (status.value === 'all' && updated.status === 'archived' && mode.value !== 'archived')
     const leavesList =
       (mode.value === 'archived' && updated.status !== 'archived') ||
       (mode.value !== 'archived' && updated.status === 'archived') ||
-      (mode.value === 'favorites' && !updated.favorite)
+      (mode.value === 'favorites' && !updated.favorite) ||
+      statusFilterMismatch
     if (leavesList) {
       void fetchList()
     } else {

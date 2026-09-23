@@ -24,7 +24,7 @@ MVP 闭环：
 
 1. 注册 / 登录（多用户，数据按 `user_id` 隔离）
 2. 粘贴 URL 保存书签；服务端异步抓取 `title` / `description` / `favicon` / `siteName`
-3. 书签列表：分页、状态筛选（未读 / 已读 / 收藏 / 归档）、标签筛选、关键词搜索（title/description/url）
+3. 书签列表：分页、状态筛选（收件箱默认未读+已读；未读 / 已读 / 归档）、标签筛选、关键词搜索（title/description/url）
 4. 单条书签：切换已读/归档、收藏、编辑标题与备注、删除、绑定/解绑标签
 5. 标签管理：创建、重命名、删除（仅影响本人数据）
 
@@ -58,13 +58,13 @@ Base: `/api`。除 `auth/*` 外均需 JWT。响应统一：
 | GET | `/api/auth/me` | — | `user:{id, username}` |
 
 - `username`：3–32 位，字母数字下划线；`password`：≥8 位
-- 密码 `BCrypt` 存储；JWT HS256，载荷 `sub=userId`，默认 7 天
+- 密码 `BCrypt` 存储；JWT **HS256**（显式固定算法），载荷 `sub=userId`，默认 7 天
 
 #### Bookmarks
 
 | Method | Path | Body / Query | Result |
 | --- | --- | --- | --- |
-| GET | `/api/bookmarks` | `page, size, status, tag, q, favorite` | `{total, items:[Bookmark]}` |
+| GET | `/api/bookmarks` | `page, size, status, tag, q, favorite` | `{total, items:[Bookmark]}`（`status` 省略=收件箱未归档；`unread\|read\|archived` 为精确筛选） |
 | POST | `/api/bookmarks` | `{url, title?, note?, tagNames?[]}` | `Bookmark`（metadata 可先空，异步补全） |
 | GET | `/api/bookmarks/{id}` | — | `Bookmark` |
 | PATCH | `/api/bookmarks/{id}` | `{title?, note?, status?, favorite?, tagNames?[]}` | `Bookmark`（`tagNames` 传入时整组替换） |

@@ -48,13 +48,17 @@ public class BookmarkService {
 
     public PageResult list(Long userId, int page, int size, String status, String tag, String q, Boolean favorite) {
         validateStatus(status);
+        // empty status = home inbox (unread+read, exclude archived)
+        if (status == null || status.isBlank()) {
+            status = "inbox";
+        }
         int safePage = Math.max(page, 1);
         int safeSize = Math.max(Math.min(size, 100), 1);
         int offset = (safePage - 1) * safeSize;
 
-        long total = bookmarkMapper.countFiltered(userId, emptyToNull(status), favorite, emptyToNull(q), emptyToNull(tag));
+        long total = bookmarkMapper.countFiltered(userId, emptyToNull(status), favorite, escapeLike(emptyToNull(q)), emptyToNull(tag));
         List<Bookmark> bookmarks = bookmarkMapper.selectFiltered(
-                userId, emptyToNull(status), favorite, emptyToNull(q), emptyToNull(tag), safeSize, offset);
+                userId, emptyToNull(status), favorite, escapeLike(emptyToNull(q)), emptyToNull(tag), safeSize, offset);
         return new PageResult(total, toDtos(bookmarks));
     }
 
@@ -217,5 +221,12 @@ public class BookmarkService {
 
     private String emptyToNull(String s) {
         return (s == null || s.isBlank()) ? null : s.trim();
+    }
+
+    private String escapeLike(String s) {
+        if (s == null) {
+            return null;
+        }
+        return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 }

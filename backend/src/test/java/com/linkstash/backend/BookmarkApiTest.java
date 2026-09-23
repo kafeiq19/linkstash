@@ -136,6 +136,18 @@ class BookmarkApiTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.total").value(1))
                 .andExpect(jsonPath("$.data.items[0].title").value("Alpha title"));
 
+        // default (no status) = inbox: unread+read, excludes archived
+        mockMvc.perform(get("/api/bookmarks")
+                        .header("Authorization", "Bearer " + tokenA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(2));
+
+        // explicit status=all is not a valid API filter
+        mockMvc.perform(get("/api/bookmarks")
+                        .header("Authorization", "Bearer " + tokenA)
+                        .param("status", "all"))
+                .andExpect(status().isBadRequest());
+
         mockMvc.perform(get("/api/bookmarks")
                         .header("Authorization", "Bearer " + tokenA)
                         .param("q", "beta.example.com"))
@@ -150,13 +162,13 @@ class BookmarkApiTest extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.total").value(2));
 
-        // pagination
+        // pagination over inbox (non-archived): Alpha + Beta = 2
         mockMvc.perform(get("/api/bookmarks")
                         .header("Authorization", "Bearer " + tokenA)
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.total").value(3))
+                .andExpect(jsonPath("$.data.total").value(2))
                 .andExpect(jsonPath("$.data.items.length()").value(2));
 
         mockMvc.perform(get("/api/bookmarks")
@@ -164,8 +176,8 @@ class BookmarkApiTest extends BaseIntegrationTest {
                         .param("page", "2")
                         .param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.total").value(3))
-                .andExpect(jsonPath("$.data.items.length()").value(1));
+                .andExpect(jsonPath("$.data.total").value(2))
+                .andExpect(jsonPath("$.data.items.length()").value(0));
 
         // invalid status → 400
         mockMvc.perform(get("/api/bookmarks")

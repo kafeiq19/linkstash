@@ -109,11 +109,15 @@ async function onDelete() {
       type: 'warning',
       confirmButtonClass: 'el-button--danger',
     })
+  } catch {
+    return
+  }
+  try {
     await store.remove(bookmark.value.id)
     ElMessage.success('已删除')
     void router.push('/')
-  } catch {
-    /* cancelled */
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '删除失败')
   }
 }
 </script>

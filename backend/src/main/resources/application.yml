@@ -7,10 +7,6 @@ spring:
   datasource:
     url: jdbc:sqlite:data/linkstash.db
     driver-class-name: org.sqlite.JDBC
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema.sql
   jackson:
     default-property-inclusion: non_null
 
@@ -23,7 +19,7 @@ mybatis-plus:
 
 linkstash:
   jwt:
-    # HS256 key, 32+ bytes. Override via LINKSTASH_JWT_SECRET in real deployments.
+    # HMAC-SHA256; 32+ bytes. Override via LINKSTASH_JWT_SECRET in real deployments.
     secret: ${LINKSTASH_JWT_SECRET:linkstash-dev-secret-change-me-please-32bytes-min!}
     expiration-days: 7
   cors:

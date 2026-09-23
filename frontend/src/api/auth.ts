@@ -10,5 +10,5 @@ export function login(username: string, password: string) {
 }
 
 export function me() {
-  return http.get<User>('/auth/me')
+  return http.get<{ user: User }>('/auth/me').then((d) => d.user)
 }
