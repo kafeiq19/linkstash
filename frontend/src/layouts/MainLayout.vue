@@ -39,14 +39,12 @@ onMounted(() => {
 })
 
 watch(
-  () => route.fullPath,
+  () => [route.meta.mode, route.query.tag] as const,
   () => {
     const nextMode = (route.meta.mode as ListMode) || 'home'
-    void store.setFilters({
-      mode: nextMode,
-      tag: (route.query.tag as string) || store.tag,
-      q: store.q,
-    })
+    const nextTag = typeof route.query.tag === 'string' ? route.query.tag : ''
+    if (nextMode === store.mode && nextTag === store.tag) return
+    void store.setFilters({ mode: nextMode, tag: nextTag })
   },
 )
 
@@ -69,7 +67,6 @@ function onSelectTag(name: string) {
     path: route.path,
     query: { ...route.query, tag: next || undefined },
   })
-  void store.setFilters({ tag: next })
 }
 
 async function onAdd() {

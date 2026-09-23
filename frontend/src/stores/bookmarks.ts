@@ -47,19 +47,24 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     return query
   }
 
+  let fetchSeq = 0
+
   async function fetchList() {
+    const seq = ++fetchSeq
     loading.value = true
     error.value = null
     try {
       const data = await bookmarksApi.listBookmarks(buildQuery())
+      if (seq !== fetchSeq) return
       items.value = data.items
       total.value = data.total
     } catch (e) {
+      if (seq !== fetchSeq) return
       error.value = e instanceof Error ? e.message : '加载失败'
       items.value = []
       total.value = 0
     } finally {
-      loading.value = false
+      if (seq === fetchSeq) loading.value = false
     }
   }
 
@@ -73,6 +78,9 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     if (next.mode !== undefined && next.mode !== mode.value) {
       mode.value = next.mode
       page.value = 1
+      // drop previous list immediately so home cards don't flash on favorites/archived
+      items.value = []
+      total.value = 0
     }
     if (next.status !== undefined) {
       status.value = next.status

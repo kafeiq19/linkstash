@@ -67,30 +67,36 @@ function onUpdated() {
       @close="store.fetchList()"
     />
 
-    <SkeletonList v-if="loading && items.length === 0" />
+    <div class="relative" :class="loading && items.length > 0 ? 'opacity-60' : ''">
+      <SkeletonList v-if="loading && items.length === 0" />
 
-    <template v-else>
-      <transition-group name="card" tag="div" class="space-y-3">
-        <BookmarkCard
-          v-for="b in items"
-          :key="b.id"
-          :bookmark="b"
-          :pending-meta="b.id < 0"
-          @changed="onUpdated"
-          @refresh="(id: number) => store.refreshOne(id)"
+      <template v-else>
+        <div class="space-y-3">
+          <BookmarkCard
+            v-for="b in items"
+            :key="b.id"
+            :bookmark="b"
+            :pending-meta="b.id < 0"
+            @changed="onUpdated"
+            @refresh="(id: number) => store.refreshOne(id)"
+          />
+        </div>
+
+        <EmptyState
+          v-if="!loading && items.length === 0"
+          :title="tag || q ? '没有匹配的书签' : mode === 'favorites' ? '还没有收藏' : mode === 'archived' ? '归档是空的' : '还没有书签'"
+          :hint="
+            tag || q
+              ? '试试调整筛选或搜索关键词'
+              : mode === 'favorites'
+                ? '在书签卡片上点星标即可收藏'
+                : mode === 'archived'
+                  ? '归档后的条目会出现在这里'
+                  : '在顶部粘贴一个 URL，开始你的稍后读清单'
+          "
         />
-      </transition-group>
-
-      <EmptyState
-        v-if="!loading && items.length === 0"
-        :title="tag || q ? '没有匹配的书签' : '还没有书签'"
-        :hint="
-          tag || q
-            ? '试试调整筛选或搜索关键词'
-            : '在顶部粘贴一个 URL，开始你的稍后读清单'
-        "
-      />
-    </template>
+      </template>
+    </div>
 
     <div v-if="pageCount > 1" class="mt-8 flex justify-center">
       <el-pagination
