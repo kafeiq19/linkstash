@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useBookmarksStore, type ListMode } from '@/stores/bookmarks'
@@ -31,6 +31,14 @@ const subtitle = computed(() => {
 })
 
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / size.value)))
+const bootstrapped = ref(false)
+
+watch(
+  () => loading.value,
+  (v) => {
+    if (!v) bootstrapped.value = true
+  },
+)
 
 watch(
   () => route.query.tag,
@@ -67,8 +75,9 @@ function onUpdated() {
       @close="store.fetchList()"
     />
 
-    <div class="relative" :class="loading && items.length > 0 ? 'opacity-60' : ''">
-      <SkeletonList v-if="loading && items.length === 0" />
+    <div class="relative" :class="loading ? 'opacity-60 pointer-events-none' : ''">
+      <!-- First visit only: skeleton. Later switches keep the list and just dim it. -->
+      <SkeletonList v-if="loading && items.length === 0 && !bootstrapped" />
 
       <template v-else>
         <div class="space-y-3">
@@ -80,6 +89,10 @@ function onUpdated() {
             @changed="onUpdated"
             @refresh="(id: number) => store.refreshOne(id)"
           />
+        </div>
+
+        <div v-if="loading && items.length === 0" class="py-10 text-center text-caption text-muted">
+          加载中…
         </div>
 
         <EmptyState

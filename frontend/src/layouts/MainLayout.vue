@@ -307,7 +307,11 @@ function go(name: string) {
       <!-- Content max-width 880px -->
       <main class="flex-1 min-w-0 overflow-y-auto">
         <div class="max-w-[880px] mx-auto px-5 py-8 md:px-10 md:py-10">
-          <router-view />
+          <router-view v-slot="{ Component }">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
+          </router-view>
         </div>
       </main>
     </div>

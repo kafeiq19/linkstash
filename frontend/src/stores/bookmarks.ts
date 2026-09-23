@@ -78,9 +78,6 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     if (next.mode !== undefined && next.mode !== mode.value) {
       mode.value = next.mode
       page.value = 1
-      // drop previous list immediately so home cards don't flash on favorites/archived
-      items.value = []
-      total.value = 0
     }
     if (next.status !== undefined) {
       status.value = next.status
