@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linkstash — 稍后读</title>
+  <meta name="description" content="Linkstash：自托管稍后读书签站。保存链接、抓取摘要、标签管理。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f2ee;
+      --surface: #ffffff;
+      --ink: #1c1c1e;
+      --muted: #6b6b76;
+      --border: #e4e1da;
+      --accent: #3b5bdb;
+      --accent-soft: #eef1fb;
+      --amber: #e8a838;
+      --success: #2f9e44;
+      --danger: #e03131;
+      --shadow: 0 1px 2px rgba(28, 28, 30, 0.04), 0 8px 24px rgba(28, 28, 30, 0.06);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(920px, calc(100% - 40px)); margin: 0 auto; }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(10px);
+      background: rgba(244, 242, 238, 0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 18px; letter-spacing: -0.02em;
+    }
+    .logo-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #5c7cfa);
+      display: grid; place-items: center; color: #fff; font-size: 14px;
+    }
+    .nav-links { display: flex; gap: 18px; align-items: center; font-size: 14px; color: var(--muted); }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--ink); text-decoration: none; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: none; cursor: pointer; font: inherit; font-weight: 600; font-size: 14px;
+      border-radius: 10px; padding: 10px 16px; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 16px rgba(59, 91, 219, 0.25); }
+    .btn-primary:hover { background: #314cbe; text-decoration: none; }
+    .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface); }
+    .hero { padding: 72px 0 40px; text-align: center; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px; background: var(--surface);
+      border: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 500;
+    }
+    .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block; }
+    h1 {
+      margin: 22px 0 14px; font-size: clamp(36px, 6vw, 56px); line-height: 1.08;
+      letter-spacing: -0.035em; font-weight: 700;
+    }
+    .lede {
+      margin: 0 auto 28px; max-width: 560px; color: var(--muted); font-size: 17px;
+    }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    section { padding: 28px 0 12px; }
+    .section-title {
+      margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; font-weight: 650;
+    }
+    .section-sub { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+    .grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 8px; font-size: 15px; font-weight: 650; }
+    .card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+    .icon {
+      width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+      background: var(--accent-soft); color: var(--accent); font-size: 16px; margin-bottom: 12px;
+    }
+    .demo {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .demo-bar {
+      display: flex; gap: 10px; padding: 14px; border-bottom: 1px solid var(--border);
+      background: #fafaf8;
+    }
+    .demo-bar input {
+      flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
+      font: inherit; font-size: 14px; background: var(--surface); color: var(--ink); outline: none;
+    }
+    .demo-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12); }
+    .demo-toolbar {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border);
+      align-items: center; justify-content: space-between;
+    }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      border: 1px solid var(--border); background: transparent; color: var(--muted);
+      border-radius: 999px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; font-weight: 500;
+    }
+    .chip.active { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+    .search {
+      border: 1px solid var(--border); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 13px;
+      min-width: 160px; outline: none; background: var(--surface);
+    }
+    .list { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 220px; }
+    .item {
+      display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start;
+      padding: 14px; border-radius: 12px; border: 1px solid transparent;
+    }
+    .item:hover { border-color: var(--border); background: #fafaf8; }
+    .favicon {
+      width: 36px; height: 36px; border-radius: 10px; background: var(--bg);
+      display: grid; place-items: center; font-weight: 700; color: var(--muted); font-size: 13px;
+    }
+    .item h4 {
+      margin: 0 0 4px; font-size: 14.5px; font-weight: 650; letter-spacing: -0.01em;
+      word-break: break-word;
+    }
+    .item h4 a { color: var(--ink); }
+    .item h4 a:hover { color: var(--accent); text-decoration: none; }
+    .meta { color: var(--muted); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .desc { margin: 6px 0 0; color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .actions { display: flex; gap: 4px; }
+    .icon-btn {
+      border: none; background: transparent; cursor: pointer; width: 32px; height: 32px;
+      border-radius: 8px; color: var(--muted); font-size: 15px;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--ink); }
+    .icon-btn.starred { color: var(--amber); }
+    .empty {
+      padding: 48px 20px; text-align: center; color: var(--muted); font-size: 14px;
+    }
+    .note {
+      margin-top: 14px; padding: 14px 16px; border-radius: 12px;
+      background: var(--accent-soft); color: #2f3f8f; font-size: 13px;
+    }
+    .stack {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px;
+    }
+    .tag {
+      font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 12px;
+    }
+    footer {
+      margin: 48px 0 36px; text-align: center; color: var(--muted); font-size: 13px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="logo"><span class="logo-mark">L</span> Linkstash</div>
+      <nav class="nav-links">
+        <a href="#demo">在线演示</a>
+        <a href="#features">能力</a>
+        <a href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="btn btn-primary" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">查看源码</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="pill"><i></i> 自托管 · 多用户 · 开源</div>
+      <h1>把网页存起来，<br />稍后再读。</h1>
+      <p class="lede">
+        Linkstash 是一个前后端分离的稍后读/书签站。这个页面是静态落地页 + 浏览器本地演示；
+        完整版（Vue 3 + Spring Boot + SQLite）在仓库里自行部署。
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#demo">试试本地演示</a>
+        <a class="btn btn-ghost" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">本地跑完整版</a>
+      </div>
+      <div class="stack">
+        <span class="tag">Vue 3</span>
+        <span class="tag">Spring Boot 3</span>
+        <span class="tag">MyBatis-Plus</span>
+        <span class="tag">SQLite</span>
+        <span class="tag">JWT 多用户</span>
+      </div>
+    </section>
+
+    <section class="wrap" id="features">
+      <h2 class="section-title">完整版能做什么</h2>
+      <p class="section-sub">下侧演示覆盖保存 / 筛选 / 收藏；完整版还有账号隔离、标签管理与元数据抓取。</p>
+      <div class="grid">
+        <article class="card">
+          <div class="icon">⌘</div>
+          <h3>一键保存</h3>
+          <p>粘贴 URL 即可入库；服务端异步抓取标题、摘要与站点图标。</p>
+        </article>
+        <article class="card">
+          <div class="icon">☰</div>
+          <h3>阅读队列</h3>
+          <p>未读 / 已读 / 归档 / 收藏，配合标签与关键词搜索，很快找回。</p>
+        </article>
+        <article class="card">
+          <div class="icon">◎</div>
+          <h3>多用户隔离</h3>
+          <p>注册登录，数据按用户隔离；JWT 鉴权，适合内网自托管。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap" id="demo">
+      <h2 class="section-title">浏览器本地演示</h2>
+      <p class="section-sub">数据只存在这台设备的 localStorage 里，刷新还在。可当书签草稿本用。</p>
+      <div class="demo">
+        <form class="demo-bar" id="add-form">
+          <input id="url-input" type="url" placeholder="粘贴链接，例如 https://example.com/post" required />
+          <button class="btn btn-primary" type="submit">保存</button>
+        </form>
+        <div class="demo-toolbar">
+          <div class="chips" id="filters">
+            <button class="chip active" data-filter="all" type="button">全部</button>
+            <button class="chip" data-filter="unread" type="button">未读</button>
+            <button class="chip" data-filter="read" type="button">已读</button>
+            <button class="chip" data-filter="favorite" type="button">收藏</button>
+            <button class="chip" data-filter="archived" type="button">归档</button>
+          </div>
+          <input class="search" id="search" type="search" placeholder="搜索标题 / 域名" />
+        </div>
+        <div class="list" id="list"></div>
+      </div>
+      <div class="note">
+        说明：GitHub Pages 只能托管静态资源，完整 API（Java + SQLite）需要你自己的服务器或内网机器。
+        仓库内 <code>backend/</code> 与 <code>frontend/</code> 可按 README 启动。
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>Linkstash · Author <a href="https://github.com/kafeiq19" target="_blank" rel="noreferrer">@kafeiq19</a> · MIT</p>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = 'linkstash-demo-v1'
+    const state = {
+      items: load(),
+      filter: 'all',
+      q: '',
+    }
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') } catch { return [] }
+    }
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
+    }
+    function hostOf(url) {
+      try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
+    }
+    function titleOf(url, host) {
+      try {
+        const u = new URL(url)
+        const seg = u.pathname.split('/').filter(Boolean).pop()
+        return seg ? decodeURIComponent(seg).replace(/[-_]+/g, ' ') : host
+      } catch { return url }
+    }
+    function normalizeUrl(raw) {
+      let s = raw.trim()
+      if (!s) return ''
+      if (!/^https?:\/\//i.test(s)) s = 'https://' + s
+      return s
+    }
+    function visible() {
+      const q = state.q.toLowerCase()
+      return state.items.filter((b) => {
+        if (state.filter === 'unread' && (b.status !== 'unread' || b.archived)) return false
+        if (state.filter === 'read' && (b.status !== 'read' || b.archived)) return false
+        if (state.filter === 'favorite' && !b.favorite) return false
+        if (state.filter === 'archived' && !b.archived) return false
+        if (state.filter === 'all' && b.archived) return false
+        if (state.filter === 'unread' && b.archived) return false
+        if (state.filter === 'read' && b.archived) return false
+        if (!q) return true
+        return (b.title + ' ' + b.host + ' ' + b.url).toLowerCase().includes(q)
+      })
+    }
+    function render() {
+      const list = document.getElementById('list')
+      const rows = visible()
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty">还没有内容。在上方粘贴一个链接试试。</div>'
+        return
+      }
+      list.innerHTML = rows.map((b) => `
+        <article class="item" data-id="${b.id}">
+          <div class="favicon">${(b.host[0] || '?').toUpperCase()}</div>
+          <div>
+            <h4><a href="${escapeAttr(b.url)}" target="_blank" rel="noreferrer">${escapeHtml(b.title)}</a></h4>
+            <div class="meta">
+              <span>${escapeHtml(b.host)}</span>
+              <span>${b.archived ? '已归档' : b.status === 'read' ? '已读' : '未读'}</span>
+              <span>${new Date(b.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn ${b.favorite ? 'starred' : ''}" data-act="fav" title="收藏">${b.favorite ? '★' : '☆'}</button>
+            <button class="icon-btn" data-act="read" title="切换已读">${b.status === 'read' ? '●' : '○'}</button>
+            <button class="icon-btn" data-act="arch" title="归档">${b.archived ? '⇪' : '⇩'}</button>
+            <button class="icon-btn" data-act="del" title="删除">✕</button>
+          </div>
+        </article>
+      `).join('')
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/`/g, '')
+    }
+
+    document.getElementById('add-form').addEventListener('submit', (e) => {
+      e.preventDefault()
+      const input = document.getElementById('url-input')
+      const url = normalizeUrl(input.value)
+      if (!url) return
+      const host = hostOf(url)
+      const item = {
+        id: Date.now(),
+        url,
+        host,
+        title: titleOf(url, host),
+        status: 'unread',
+        favorite: false,
+        archived: false,
+        createdAt: Date.now(),
+      }
+      state.items.unshift(item)
+      save()
+      input.value = ''
+      render()
+    })
+
+    document.getElementById('filters').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-filter]')
+      if (!btn) return
+      state.filter = btn.dataset.filter
+      document.querySelectorAll('#filters .chip').forEach((c) => c.classList.toggle('active', c === btn))
+      render()
+    })
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      state.q = e.target.value
+      render()
+    })
+
+    document.getElementById('list').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]')
+      if (!btn) return
+      const id = Number(btn.closest('[data-id]').dataset.id)
+      const item = state.items.find((b) => b.id === id)
+      if (!item) return
+      const act = btn.dataset.act
+      if (act === 'fav') item.favorite = !item.favorite
+      if (act === 'read') item.status = item.status === 'read' ? 'unread' : 'read'
+      if (act === 'arch') item.archived = !item.archived
+      if (act === 'del') state.items = state.items.filter((b) => b.id !== id)
+      save()
+      render()
+    })
+
+    if (!state.items.length) {
+      state.items = [
+        {
+          id: Date.now() - 3000,
+          url: 'https://github.com/kafeiq19/linkstash',
+          host: 'github.com',
+          title: 'kafeiq19 / linkstash',
+          status: 'unread',
+          favorite: true,
+          archived: false,
+          createdAt: Date.now() - 3000,
+        },
+        {
+          id: Date.now() - 2000,
+          url: 'https://vuejs.org/guide/introduction.html',
+          host: 'vuejs.org',
+          title: 'Vue.js Introduction',
+          status: 'read',
+          favorite: false,
+          archived: false,
+          createdAt: Date.now() - 2000,
+        },
+        {
+          id: Date.now() - 1000,
+          url: 'https://spring.io/projects/spring-boot',
+          host: 'spring.io',
+          title: 'Spring Boot',
+          status: 'unread',
+          favorite: false,
+          archived: true,
+          createdAt: Date.now() - 1000,
+        },
+      ]
+      save()
+    }
+    render()
+  </script>
+</body>
+</html>
