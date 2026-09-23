@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: linkstash-backend
+  datasource:
+    url: jdbc:sqlite:data/linkstash.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  jackson:
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+
+linkstash:
+  jwt:
+    # HS256 key, 32+ bytes. Override via LINKSTASH_JWT_SECRET in real deployments.
+    secret: ${LINKSTASH_JWT_SECRET:linkstash-dev-secret-change-me-please-32bytes-min!}
+    expiration-days: 7
+  cors:
+    allowed-origins: http://localhost:5173
+  metadata:
+    timeout-ms: 5000
+
+logging:
+  level:
+    com.linkstash.backend: INFO

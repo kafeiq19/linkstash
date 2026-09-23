@@ -1,0 +1,35 @@
+# Java / Maven
+backend/target/
+*.class
+*.jar
+!maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# Data / runtime
+backend/data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
