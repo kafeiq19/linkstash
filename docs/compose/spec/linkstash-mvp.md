@@ -1,14 +1,20 @@
 ---
 feature: linkstash-mvp
-status: in-progress
+status: delivered
 updated: 2026-07-22
 branch: feat/mvp
-commits: 
+commits: c8d37708783871ec04014149ab3cae7689ff8ce6..a6060173575829f0b62c2eda41167a343dfaa6f0
 ---
 
 # Linkstash MVP
 
 ## Report
+
+**What was built** — Linkstash MVP monorepo：Vue 3 SPA（登录/注册、书签列表、筛选搜索、标签、详情编辑）+ Spring Boot 3 API（JWT 多用户隔离、书签/标签 CRUD、SQLite、Jsoup 异步抓元数据）。作者 kafeiq19。
+
+**Verification** — `backend`: `mvn test` → Tests run: 18, Failures: 0。`frontend`: `npm run build`（vue-tsc + vite）→ PASS。
+
+**Journey log** — ① MyBatis 注解动态 SQL 的 `foreach` 必须包在 `<script>` 里。② UI 的 `status=all` 不能直传 API：省略 `status` = 收件箱（排除归档）。③ JJWT `signWith(Key)` 会按密钥长度选 HS384，需显式 `Jwts.SIG.HS256`。④ Java text block 里 SQL `ESCAPE '\'` 要写成 `ESCAPE '\\'`。⑤ 独立评审应盯 UI 实际 query，而不只是单测。
 
 ## [S1] Problem
 
@@ -205,13 +211,13 @@ bookmark_tag(
 
 ## Tasks
 
-- [ ] T1: 后端工程骨架（Spring Boot 3 + MyBatis-Plus + SQLite + 安全过滤器） — acceptance: `mvn test` 可启动上下文并连上 SQLite schema (covers: S2)
-- [ ] T2: 用户注册/登录/JWT/me API — acceptance: 注册、登录、带 token 访问 me 的集成测试通过 (covers: S2; depends: T1)
-- [ ] T3: 书签 CRUD、筛选、搜索 API 与用户隔离 — acceptance: 跨用户访问返回 404，筛选/搜索集成测试通过 (covers: S2; depends: T2)
-- [ ] T4: 标签 CRUD 与书签打标 — acceptance: 同用户标签唯一，删除标签解绑关系 (covers: S2; depends: T3)
-- [ ] T5: 链接元数据异步抓取 — acceptance: 给定 HTML fixture 能解析 title/description/favicon (covers: S2; depends: T1)
-- [ ] T6: 前端工程骨架与鉴权页 — acceptance: 登录注册可拿到 token 并进入主列表，刷新后保持会话 (covers: S2; depends: T2)
-- [ ] T7: 书签列表/筛选/搜索/添加 UI — acceptance: 可添加 URL 并看到列表与筛选生效 (covers: S2; depends: T6)
-- [ ] T8: 书签操作与标签管理 UI — acceptance: 已读/收藏/归档/删除/打标/标签管理主路径可走通 (covers: S2; depends: T7)
-- [ ] T9: README 本地启动说明 — acceptance: 按 README 能前后端联调跑通 (covers: S2)
-- [ ] T10: 全量验证 — acceptance: 后端 `mvn test` 与前端 `npm run build` 均通过 (covers: S2; depends: T8, T9)
+- [x] T1: 后端工程骨架（Spring Boot 3 + MyBatis-Plus + SQLite + 安全过滤器） — acceptance: `mvn test` 可启动上下文并连上 SQLite schema (covers: S2)
+- [x] T2: 用户注册/登录/JWT/me API — acceptance: 注册、登录、带 token 访问 me 的集成测试通过 (covers: S2; depends: T1)
+- [x] T3: 书签 CRUD、筛选、搜索 API 与用户隔离 — acceptance: 跨用户访问返回 404，筛选/搜索集成测试通过 (covers: S2; depends: T2)
+- [x] T4: 标签 CRUD 与书签打标 — acceptance: 同用户标签唯一，删除标签解绑关系 (covers: S2; depends: T3)
+- [x] T5: 链接元数据异步抓取 — acceptance: 给定 HTML fixture 能解析 title/description/favicon (covers: S2; depends: T1)
+- [x] T6: 前端工程骨架与鉴权页 — acceptance: 登录注册可拿到 token 并进入主列表，刷新后保持会话 (covers: S2; depends: T2)
+- [x] T7: 书签列表/筛选/搜索/添加 UI — acceptance: 可添加 URL 并看到列表与筛选生效 (covers: S2; depends: T6)
+- [x] T8: 书签操作与标签管理 UI — acceptance: 已读/收藏/归档/删除/打标/标签管理主路径可走通 (covers: S2; depends: T7)
+- [x] T9: README 本地启动说明 — acceptance: 按 README 能前后端联调跑通 (covers: S2)
+- [x] T10: 全量验证 — acceptance: 后端 `mvn test` 与前端 `npm run build` 均通过 (covers: S2; depends: T8, T9)
