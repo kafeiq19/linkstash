@@ -40,9 +40,27 @@ const router = createRouter({
           meta: { mode: 'archived', requiresAuth: true },
         },
         {
+          path: 'save',
+          name: 'save',
+          component: () => import('@/views/SaveView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
           path: 'b/:id',
           name: 'bookmark-detail',
           component: () => import('@/views/DetailView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'save',
+          name: 'save',
+          component: () => import('@/views/SaveView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'save',
+          name: 'save',
+          component: () => import('@/views/SaveView.vue'),
           meta: { requiresAuth: true },
         },
       ],

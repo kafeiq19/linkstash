@@ -226,6 +226,7 @@ function go(name: string) {
               { name: 'home', label: '收件箱' },
               { name: 'favorites', label: '收藏' },
               { name: 'archived', label: '归档' },
+              { name: 'save', label: '保存 / 小工具' },
             ]"
             :key="opt.name"
             class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors"

@@ -39,6 +39,14 @@ npm run dev
 # UI: http://localhost:5173  (代理 /api → 8080)
 ```
 
+### 一键保存
+
+登录后打开侧栏「保存 / 小工具」：
+
+- 手动粘贴 URL 保存
+- 把「存入 Linkstash」按钮拖到浏览器书签栏，在任意网页点一下即可带着网址保存
+- 也可直接访问 `/save?url=…&title=…`
+
 ### Tests
 
 ```bash
