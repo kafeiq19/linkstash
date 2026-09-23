@@ -3,426 +3,917 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Linkstash — 稍后读</title>
-  <meta name="description" content="Linkstash：自托管稍后读书签站。保存链接、抓取摘要、标签管理。" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Linkstash — 自托管稍后读</title>
+  <meta name="description" content="Linkstash 是开源的自托管稍后读与书签库：保存网页、管理阅读队列、标签检索，多用户数据隔离。" />
   <style>
     :root {
-      --bg: #f4f2ee;
-      --surface: #ffffff;
-      --ink: #1c1c1e;
-      --muted: #6b6b76;
-      --border: #e4e1da;
-      --accent: #3b5bdb;
-      --accent-soft: #eef1fb;
-      --amber: #e8a838;
-      --success: #2f9e44;
-      --danger: #e03131;
-      --shadow: 0 1px 2px rgba(28, 28, 30, 0.04), 0 8px 24px rgba(28, 28, 30, 0.06);
-      --radius: 12px;
+      --ink: #1a1a18;
+      --paper: #fafaf7;
+      --sheet: #ffffff;
+      --rule: #d9d6cf;
+      --rule-strong: #b8b4ab;
+      --muted: #6c6a64;
+      --faint: #8f8c85;
+      --accent: #1b4d3e;
+      --accent-soft: #e8efe9;
+      --star: #a dig;
+      --danger: #8b2e2e;
+      --font-display: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+      --font-body: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Cascadia Code", Consolas, ui-monospace, "SF Mono", monospace;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-      background: var(--bg);
+      background: var(--paper);
       color: var(--ink);
-      line-height: 1.55;
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .wrap { width: min(920px, calc(100% - 40px)); margin: 0 auto; }
-    header {
-      position: sticky; top: 0; z-index: 10;
-      backdrop-filter: blur(10px);
-      background: rgba(244, 242, 238, 0.85);
-      border-bottom: 1px solid var(--border);
+    a { color: inherit; }
+    button, input { font: inherit; }
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--rule);
+      background: rgba(250, 250, 247, 0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .topbar-inner {
+      width: min(1080px, calc(100% - 48px));
+      margin: 0 auto;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+    }
+    .brand-ver {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.04em;
     }
     .nav {
-      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 13px;
     }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 18px; letter-spacing: -0.02em;
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
     }
-    .logo-mark {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent), #5c7cfa);
-      display: grid; place-items: center; color: #fff; font-size: 14px;
+    .nav a:hover { color: var(--ink); }
+    .nav .cta {
+      color: var(--sheet);
+      background: var(--ink);
+      padding: 7px 12px;
+      border-radius: 3px;
     }
-    .nav-links { display: flex; gap: 18px; align-items: center; font-size: 14px; color: var(--muted); }
-    .nav-links a { color: var(--muted); }
-    .nav-links a:hover { color: var(--ink); text-decoration: none; }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      border: none; cursor: pointer; font: inherit; font-weight: 600; font-size: 14px;
-      border-radius: 10px; padding: 10px 16px; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    .nav .cta:hover { color: var(--sheet); background: var(--accent); }
+
+    .page {
+      width: min(1080px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 56px 0 80px;
     }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 16px rgba(59, 91, 219, 0.25); }
-    .btn-primary:hover { background: #314cbe; text-decoration: none; }
-    .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
-    .btn-ghost:hover { background: var(--surface); }
-    .hero { padding: 72px 0 40px; text-align: center; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 12px; border-radius: 999px; background: var(--surface);
-      border: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 500;
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: 48px;
+      align-items: start;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--rule);
     }
-    .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block; }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 32px; }
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 18px;
+    }
     h1 {
-      margin: 22px 0 14px; font-size: clamp(36px, 6vw, 56px); line-height: 1.08;
-      letter-spacing: -0.035em; font-weight: 700;
+      font-family: var(--font-display);
+      font-size: clamp(34px, 5vw, 48px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+      margin: 0 0 18px;
     }
     .lede {
-      margin: 0 auto 28px; max-width: 560px; color: var(--muted); font-size: 17px;
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 15.5px;
+      max-width: 36em;
     }
-    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    section { padding: 28px 0 12px; }
-    .section-title {
-      margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; font-weight: 650;
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 22px;
+      align-items: center;
+      margin-bottom: 32px;
     }
-    .section-sub { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
-    .grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 3px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--sheet);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
     }
-    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
-    .card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 20px; box-shadow: var(--shadow);
+    .btn:hover { background: var(--accent); border-color: var(--accent); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--rule-strong);
     }
-    .card h3 { margin: 0 0 8px; font-size: 15px; font-weight: 650; }
-    .card p { margin: 0; color: var(--muted); font-size: 13.5px; }
-    .icon {
-      width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
-      background: var(--accent-soft); color: var(--accent); font-size: 16px; margin-bottom: 12px;
+    .btn-ghost:hover {
+      background: var(--sheet);
+      color: var(--accent);
+      border-color: var(--accent);
     }
-    .demo {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      box-shadow: var(--shadow); overflow: hidden;
+
+    .facts {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 8px 16px;
+      font-size: 13px;
+      max-width: 28em;
     }
-    .demo-bar {
-      display: flex; gap: 10px; padding: 14px; border-bottom: 1px solid var(--border);
-      background: #fafaf8;
+    .facts dt {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      padding-top: 3px;
     }
-    .demo-bar input {
-      flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
-      font: inherit; font-size: 14px; background: var(--surface); color: var(--ink); outline: none;
+    .facts dd {
+      margin: 0;
+      color: var(--ink);
     }
-    .demo-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12); }
-    .demo-toolbar {
-      display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border);
-      align-items: center; justify-content: space-between;
+
+    /* Product window — signature */
+    .window {
+      background: var(--sheet);
+      border: 1px solid var(--rule-strong);
+      border-radius: 6px;
+      box-shadow:
+        0 1px 0 rgba(26, 26, 24, 0.04),
+        0 18px 40px rgba(26, 26, 24, 0.08);
+      overflow: hidden;
     }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .chip {
-      border: 1px solid var(--border); background: transparent; color: var(--muted);
-      border-radius: 999px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; font-weight: 500;
+    .window-chrome {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rule);
+      background: #f3f2ed;
     }
-    .chip.active { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
-    .search {
-      border: 1px solid var(--border); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 13px;
-      min-width: 160px; outline: none; background: var(--surface);
+    .window-dots {
+      display: flex;
+      gap: 6px;
     }
-    .list { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 220px; }
-    .item {
-      display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start;
-      padding: 14px; border-radius: 12px; border: 1px solid transparent;
+    .window-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rule-strong);
     }
-    .item:hover { border-color: var(--border); background: #fafaf8; }
-    .favicon {
-      width: 36px; height: 36px; border-radius: 10px; background: var(--bg);
-      display: grid; place-items: center; font-weight: 700; color: var(--muted); font-size: 13px;
+    .window-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.04em;
     }
-    .item h4 {
-      margin: 0 0 4px; font-size: 14.5px; font-weight: 650; letter-spacing: -0.01em;
-      word-break: break-word;
+    .window-body {
+      display: grid;
+      grid-template-columns: 148px 1fr;
+      min-height: 360px;
     }
-    .item h4 a { color: var(--ink); }
-    .item h4 a:hover { color: var(--accent); text-decoration: none; }
-    .meta { color: var(--muted); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .desc { margin: 6px 0 0; color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .actions { display: flex; gap: 4px; }
-    .icon-btn {
-      border: none; background: transparent; cursor: pointer; width: 32px; height: 32px;
-      border-radius: 8px; color: var(--muted); font-size: 15px;
+    @media (max-width: 640px) {
+      .window-body { grid-template-columns: 1fr; }
+      .side { display: none; }
     }
-    .icon-btn:hover { background: var(--bg); color: var(--ink); }
-    .icon-btn.starred { color: var(--amber); }
+    .side {
+      border-right: 1px solid var(--rule);
+      padding: 14px 10px;
+      background: #fcfcfa;
+    }
+    .side-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--faint);
+      padding: 4px 8px 8px;
+    }
+    .side button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 8px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .side button:hover { background: var(--paper); color: var(--ink); }
+    .side button.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .side .count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+    }
+    .side button.active .count { color: var(--accent); }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .compose {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .compose input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 9px 11px;
+      background: var(--sheet);
+      color: var(--ink);
+    }
+    .compose input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .compose button {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 3px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .compose button:hover { filter: brightness(1.08); }
+    .compose button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .toolbar input[type="search"] {
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 7px 10px;
+      width: 160px;
+      background: var(--sheet);
+    }
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 12px;
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--rule);
+      align-items: start;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row:hover { background: #fcfcfa; }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 6px;
+      background: var(--accent);
+    }
+    .status-dot.read {
+      background: transparent;
+      border: 1.5px solid var(--rule-strong);
+    }
+    .row-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+    .row-title a {
+      text-decoration: none;
+    }
+    .row-title a:hover { color: var(--accent); }
+    .row-meta {
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .row-actions {
+      display: flex;
+      gap: 2px;
+    }
+    .row-actions button {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      background: transparent;
+      color: var(--faint);
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .row-actions button:hover {
+      background: var(--paper);
+      color: var(--ink);
+    }
+    .row-actions button.on {
+      color: var(--accent);
+      font-weight: 700;
+    }
     .empty {
-      padding: 48px 20px; text-align: center; color: var(--muted); font-size: 14px;
+      padding: 40px 16px;
+      text-align: center;
+      color: var(--faint);
+      font-size: 13px;
     }
+
     .note {
-      margin-top: 14px; padding: 14px 16px; border-radius: 12px;
-      background: var(--accent-soft); color: #2f3f8f; font-size: 13px;
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--muted);
     }
-    .stack {
-      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px;
+    .note code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--sheet);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 1px 5px;
     }
-    .tag {
-      font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--border);
-      border-radius: 999px; padding: 6px 12px;
+
+    /* Spec sheet */
+    .section {
+      padding: 48px 0 8px;
+    }
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--ink);
+    }
+    .section-head h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .section-head span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .rows {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .spec-row {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1.1fr) minmax(0, 1.4fr);
+      gap: 20px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--rule);
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .spec-row { grid-template-columns: 48px 1fr; }
+      .spec-row .spec-body { grid-column: 2; }
+    }
+    .spec-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      padding-top: 4px;
+    }
+    .spec-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    .spec-body {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.5px;
+    }
+
+    .stack-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .stack-table th,
+    .stack-table td {
+      text-align: left;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+    .stack-table th {
+      width: 140px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .close {
+      margin-top: 48px;
+      padding: 28px 0 8px;
+      border-top: 1px solid var(--ink);
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+    .close h2 {
+      margin: 0 0 8px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+    }
+    .close p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 36em;
+      font-size: 14.5px;
     }
     footer {
-      margin: 48px 0 36px; text-align: center; color: var(--muted); font-size: 13px;
+      margin-top: 40px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.04em;
     }
-    .hidden { display: none !important; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--ink); }
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap nav">
-      <div class="logo"><span class="logo-mark">L</span> Linkstash</div>
-      <nav class="nav-links">
-        <a href="#demo">在线演示</a>
-        <a href="#features">能力</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#">
+        <span class="brand-name">Linkstash</span>
+        <span class="brand-ver">v0.1.0</span>
+      </a>
+      <nav class="nav">
+        <a href="#capabilities">能力</a>
+        <a href="#runtime">运行时</a>
         <a href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="btn btn-primary" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">查看源码</a>
+        <a class="cta" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">部署说明</a>
       </nav>
     </div>
   </header>
 
-  <main>
-    <section class="hero wrap">
-      <div class="pill"><i></i> 自托管 · 多用户 · 开源</div>
-      <h1>把网页存起来，<br />稍后再读。</h1>
-      <p class="lede">
-        Linkstash 是一个前后端分离的稍后读/书签站。这个页面是静态落地页 + 浏览器本地演示；
-        完整版（Vue 3 + Spring Boot + SQLite）在仓库里自行部署。
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#demo">试试本地演示</a>
-        <a class="btn btn-ghost" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">本地跑完整版</a>
-      </div>
-      <div class="stack">
-        <span class="tag">Vue 3</span>
-        <span class="tag">Spring Boot 3</span>
-        <span class="tag">MyBatis-Plus</span>
-        <span class="tag">SQLite</span>
-        <span class="tag">JWT 多用户</span>
-      </div>
-    </section>
-
-    <section class="wrap" id="features">
-      <h2 class="section-title">完整版能做什么</h2>
-      <p class="section-sub">下侧演示覆盖保存 / 筛选 / 收藏；完整版还有账号隔离、标签管理与元数据抓取。</p>
-      <div class="grid">
-        <article class="card">
-          <div class="icon">⌘</div>
-          <h3>一键保存</h3>
-          <p>粘贴 URL 即可入库；服务端异步抓取标题、摘要与站点图标。</p>
-        </article>
-        <article class="card">
-          <div class="icon">☰</div>
-          <h3>阅读队列</h3>
-          <p>未读 / 已读 / 归档 / 收藏，配合标签与关键词搜索，很快找回。</p>
-        </article>
-        <article class="card">
-          <div class="icon">◎</div>
-          <h3>多用户隔离</h3>
-          <p>注册登录，数据按用户隔离；JWT 鉴权，适合内网自托管。</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="wrap" id="demo">
-      <h2 class="section-title">浏览器本地演示</h2>
-      <p class="section-sub">数据只存在这台设备的 localStorage 里，刷新还在。可当书签草稿本用。</p>
-      <div class="demo">
-        <form class="demo-bar" id="add-form">
-          <input id="url-input" type="url" placeholder="粘贴链接，例如 https://example.com/post" required />
-          <button class="btn btn-primary" type="submit">保存</button>
-        </form>
-        <div class="demo-toolbar">
-          <div class="chips" id="filters">
-            <button class="chip active" data-filter="all" type="button">全部</button>
-            <button class="chip" data-filter="unread" type="button">未读</button>
-            <button class="chip" data-filter="read" type="button">已读</button>
-            <button class="chip" data-filter="favorite" type="button">收藏</button>
-            <button class="chip" data-filter="archived" type="button">归档</button>
-          </div>
-          <input class="search" id="search" type="search" placeholder="搜索标题 / 域名" />
+  <div class="page">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Self-hosted reading queue</p>
+        <h1>稍后读，放在<br />你自己的机器上</h1>
+        <p class="lede">
+          Linkstash 保存网页链接，提取标题与摘要，按状态与标签管理阅读队列。
+          开源、多用户隔离，数据落在单个 SQLite 文件里，不经过第三方稍后读服务。
+        </p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">查看源码</a>
+          <a class="btn btn-ghost" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">本地启动</a>
         </div>
-        <div class="list" id="list"></div>
+        <dl class="facts">
+          <dt>部署</dt>
+          <dd>自有服务器 / 内网主机</dd>
+          <dt>数据</dt>
+          <dd>SQLite 单文件，可备份可迁移</dd>
+          <dt>账号</dt>
+          <dd>注册登录，按用户隔离</dd>
+        </dl>
       </div>
-      <div class="note">
-        说明：GitHub Pages 只能托管静态资源，完整 API（Java + SQLite）需要你自己的服务器或内网机器。
-        仓库内 <code>backend/</code> 与 <code>frontend/</code> 可按 README 启动。
-      </div>
-    </section>
-  </main>
 
-  <footer class="wrap">
-    <p>Linkstash · Author <a href="https://github.com/kafeiq19" target="_blank" rel="noreferrer">@kafeiq19</a> · MIT</p>
-  </footer>
-
-  <script>
-    const STORAGE_KEY = 'linkstash-demo-v1'
-    const state = {
-      items: load(),
-      filter: 'all',
-      q: '',
-    }
-
-    function load() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') } catch { return [] }
-    }
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
-    }
-    function hostOf(url) {
-      try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
-    }
-    function titleOf(url, host) {
-      try {
-        const u = new URL(url)
-        const seg = u.pathname.split('/').filter(Boolean).pop()
-        return seg ? decodeURIComponent(seg).replace(/[-_]+/g, ' ') : host
-      } catch { return url }
-    }
-    function normalizeUrl(raw) {
-      let s = raw.trim()
-      if (!s) return ''
-      if (!/^https?:\/\//i.test(s)) s = 'https://' + s
-      return s
-    }
-    function visible() {
-      const q = state.q.toLowerCase()
-      return state.items.filter((b) => {
-        if (state.filter === 'unread' && (b.status !== 'unread' || b.archived)) return false
-        if (state.filter === 'read' && (b.status !== 'read' || b.archived)) return false
-        if (state.filter === 'favorite' && !b.favorite) return false
-        if (state.filter === 'archived' && !b.archived) return false
-        if (state.filter === 'all' && b.archived) return false
-        if (state.filter === 'unread' && b.archived) return false
-        if (state.filter === 'read' && b.archived) return false
-        if (!q) return true
-        return (b.title + ' ' + b.host + ' ' + b.url).toLowerCase().includes(q)
-      })
-    }
-    function render() {
-      const list = document.getElementById('list')
-      const rows = visible()
-      if (!rows.length) {
-        list.innerHTML = '<div class="empty">还没有内容。在上方粘贴一个链接试试。</div>'
-        return
-      }
-      list.innerHTML = rows.map((b) => `
-        <article class="item" data-id="${b.id}">
-          <div class="favicon">${(b.host[0] || '?').toUpperCase()}</div>
-          <div>
-            <h4><a href="${escapeAttr(b.url)}" target="_blank" rel="noreferrer">${escapeHtml(b.title)}</a></h4>
-            <div class="meta">
-              <span>${escapeHtml(b.host)}</span>
-              <span>${b.archived ? '已归档' : b.status === 'read' ? '已读' : '未读'}</span>
-              <span>${new Date(b.createdAt).toLocaleString()}</span>
+      <div>
+        <div class="window" id="app">
+          <div class="window-chrome">
+            <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="window-title">LINKSTASH — LOCAL PREVIEW</div>
+          </div>
+          <div class="window-body">
+            <aside class="side">
+              <div class="side-label">Library</div>
+              <button type="button" data-filter="inbox" class="active">收件箱 <span class="count" id="c-inbox">0</span></button>
+              <button type="button" data-filter="unread">未读 <span class="count" id="c-unread">0</span></button>
+              <button type="button" data-filter="read">已读 <span class="count" id="c-read">0</span></button>
+              <button type="button" data-filter="favorite">收藏 <span class="count" id="c-fav">0</span></button>
+              <button type="button" data-filter="archived">归档 <span class="count" id="c-arch">0</span></button>
+            </aside>
+            <div class="main">
+              <form class="compose" id="add-form" autocomplete="off">
+                <input id="url" type="text" inputmode="url" placeholder="粘贴 URL 保存到收件箱" aria-label="URL" />
+                <button type="submit" id="save-btn">保存</button>
+              </form>
+              <div class="toolbar">
+                <span class="window-title" id="filter-label">INBOX</span>
+                <input id="q" type="search" placeholder="搜索" aria-label="搜索书签" />
+              </div>
+              <ul class="list" id="list"></ul>
             </div>
           </div>
-          <div class="actions">
-            <button class="icon-btn ${b.favorite ? 'starred' : ''}" data-act="fav" title="收藏">${b.favorite ? '★' : '☆'}</button>
-            <button class="icon-btn" data-act="read" title="切换已读">${b.status === 'read' ? '●' : '○'}</button>
-            <button class="icon-btn" data-act="arch" title="归档">${b.archived ? '⇪' : '⇩'}</button>
-            <button class="icon-btn" data-act="del" title="删除">✕</button>
-          </div>
-        </article>
-      `).join('')
-    }
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
-    }
-    function escapeAttr(s) {
-      return escapeHtml(s).replace(/`/g, '')
-    }
+        </div>
+        <p class="note">
+          右侧为本机演示：数据写入浏览器 <code>localStorage</code>，可当作草稿收件箱使用。
+          完整服务端（抓取元数据、账号、标签）见仓库 <code>backend/</code>。
+        </p>
+      </div>
+    </section>
 
-    document.getElementById('add-form').addEventListener('submit', (e) => {
-      e.preventDefault()
-      const input = document.getElementById('url-input')
-      const url = normalizeUrl(input.value)
-      if (!url) return
-      const host = hostOf(url)
-      const item = {
-        id: Date.now(),
-        url,
-        host,
-        title: titleOf(url, host),
-        status: 'unread',
-        favorite: false,
-        archived: false,
-        createdAt: Date.now(),
+    <section class="section" id="capabilities">
+      <div class="section-head">
+        <h2>产品能力</h2>
+        <span>Capabilities</span>
+      </div>
+      <ol class="rows">
+        <li class="spec-row">
+          <div class="spec-num">01</div>
+          <h3 class="spec-title">保存</h3>
+          <p class="spec-body">粘贴 URL 入库。服务端异步抓取 Open Graph / 标题 / 站点图标；抓取失败不影响保存，队列先建立。</p>
+        </li>
+        <li class="spec-row">
+          <div class="spec-num">02</div>
+          <h3 class="spec-title">队列</h3>
+          <p class="spec-body">未读、已读、归档、收藏四种状态。收件箱默认只含未读与已读，归档单独存放，避免列表被旧链接淹没。</p>
+        </li>
+        <li class="spec-row">
+          <div class="spec-num">03</div>
+          <h3 class="spec-title">检索</h3>
+          <p class="spec-body">按标题、摘要、URL 关键词搜索，按标签名筛选。标签同用户唯一，删除标签仅解除关联，不误删书签。</p>
+        </li>
+        <li class="spec-row">
+          <div class="spec-num">04</div>
+          <h3 class="spec-title">账号</h3>
+          <p class="spec-body">注册 / 登录，JWT（HS256）鉴权。书签与标签按 <code>user_id</code> 隔离，越权访问一律按不存在处理。</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" id="runtime">
+      <div class="section-head">
+        <h2>技术规格</h2>
+        <span>Runtime</span>
+      </div>
+      <table class="stack-table">
+        <tbody>
+          <tr>
+            <th>前端</th>
+            <td>Vue 3 · Vite · TypeScript · Pinia · Element Plus</td>
+          </tr>
+          <tr>
+            <th>后端</th>
+            <td>Java 17 · Spring Boot 3 · MyBatis-Plus · sqlite-jdbc</td>
+          </tr>
+          <tr>
+            <th>鉴权</th>
+            <td>注册登录 · BCrypt · JWT HS256 · 默认 7 天</td>
+          </tr>
+          <tr>
+            <th>元数据</th>
+            <td>Jsoup 异步抓取 · 超时 5 秒 · 失败降级为原始 URL</td>
+          </tr>
+          <tr>
+            <th>许可</th>
+            <td>MIT · Author <a href="https://github.com/kafeiq19" target="_blank" rel="noreferrer">@kafeiq19</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="close">
+      <div>
+        <h2>源码在 GitHub</h2>
+        <p>静态页可直接托管；完整 API 与 SQLite 需要你的 Java 运行环境。启动步骤见 README。</p>
+      </div>
+      <div class="actions" style="margin:0">
+        <a class="btn" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">kafeiq19/linkstash</a>
+      </div>
+    </section>
+
+    <footer>
+      <span>LINKSTASH · SELF-HOSTED READING QUEUE</span>
+      <span><a href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">GITHUB</a> · MIT</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const KEY = 'linkstash-preview-v2'
+      const LABELS = {
+        inbox: 'INBOX',
+        unread: 'UNREAD',
+        read: 'READ',
+        favorite: 'FAVORITE',
+        archived: 'ARCHIVE',
       }
-      state.items.unshift(item)
-      save()
-      input.value = ''
-      render()
-    })
 
-    document.getElementById('filters').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-filter]')
-      if (!btn) return
-      state.filter = btn.dataset.filter
-      document.querySelectorAll('#filters .chip').forEach((c) => c.classList.toggle('active', c === btn))
-      render()
-    })
+      let items = load()
+      let filter = 'inbox'
+      let q = ''
 
-    document.getElementById('search').addEventListener('input', (e) => {
-      state.q = e.target.value
-      render()
-    })
+      function load() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(KEY) || 'null')
+          if (Array.isArray(raw)) return raw
+        } catch (e) { /* ignore */ }
+        return seed()
+      }
 
-    document.getElementById('list').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-act]')
-      if (!btn) return
-      const id = Number(btn.closest('[data-id]').dataset.id)
-      const item = state.items.find((b) => b.id === id)
-      if (!item) return
-      const act = btn.dataset.act
-      if (act === 'fav') item.favorite = !item.favorite
-      if (act === 'read') item.status = item.status === 'read' ? 'unread' : 'read'
-      if (act === 'arch') item.archived = !item.archived
-      if (act === 'del') state.items = state.items.filter((b) => b.id !== id)
-      save()
-      render()
-    })
+      function seed() {
+        const now = Date.now()
+        return [
+          {
+            id: now - 3,
+            url: 'https://github.com/kafeiq19/linkstash',
+            title: 'kafeiq19 / linkstash',
+            host: 'github.com',
+            status: 'unread',
+            favorite: true,
+            archived: false,
+            at: now - 3,
+          },
+          {
+            id: now - 2,
+            url: 'https://spring.io/projects/spring-boot',
+            title: 'Spring Boot',
+            host: 'spring.io',
+            status: 'read',
+            favorite: false,
+            archived: false,
+            at: now - 2,
+          },
+          {
+            id: now - 1,
+            url: 'https://vuejs.org/guide/introduction.html',
+            title: 'Vue.js — Introduction',
+            host: 'vuejs.org',
+            status: 'unread',
+            favorite: false,
+            archived: true,
+            at: now - 1,
+          },
+        ]
+      }
 
-    if (!state.items.length) {
-      state.items = [
-        {
-          id: Date.now() - 3000,
-          url: 'https://github.com/kafeiq19/linkstash',
-          host: 'github.com',
-          title: 'kafeiq19 / linkstash',
+      function persist() {
+        localStorage.setItem(KEY, JSON.stringify(items))
+      }
+
+      function normalize(raw) {
+        let s = String(raw || '').trim()
+        if (!s) return ''
+        if (!/^https?:\/\//i.test(s)) s = 'https://' + s
+        try {
+          const u = new URL(s)
+          if (!u.hostname) return ''
+          return u.href
+        } catch (e) {
+          return ''
+        }
+      }
+
+      function hostOf(url) {
+        try {
+          return new URL(url).hostname.replace(/^www\./, '')
+        } catch (e) {
+          return url
+        }
+      }
+
+      function titleOf(url, host) {
+        try {
+          const u = new URL(url)
+          const seg = u.pathname.split('/').filter(Boolean).pop()
+          if (!seg) return host
+          return decodeURIComponent(seg).replace(/\.(html?|php|aspx)$/i, '').replace(/[-_]+/g, ' ') || host
+        } catch (e) {
+          return host
+        }
+      }
+
+      function visible() {
+        const needle = q.trim().toLowerCase()
+        return items.filter(function (b) {
+          if (filter === 'inbox' && (b.archived || false)) return false
+          if (filter === 'unread' && (b.archived || b.status !== 'unread')) return false
+          if (filter === 'read' && (b.archived || b.status !== 'read')) return false
+          if (filter === 'favorite' && !b.favorite) return false
+          if (filter === 'archived' && !b.archived) return false
+          if (!needle) return true
+          return (b.title + ' ' + b.host + ' ' + b.url).toLowerCase().indexOf(needle) !== -1
+        })
+      }
+
+      function counts() {
+        return {
+          inbox: items.filter(function (b) { return !b.archived }).length,
+          unread: items.filter(function (b) { return !b.archived && b.status === 'unread' }).length,
+          read: items.filter(function (b) { return !b.archived && b.status === 'read' }).length,
+          favorite: items.filter(function (b) { return b.favorite && !b.archived }).length,
+          archived: items.filter(function (b) { return b.archived }).length,
+        }
+      }
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+        })
+      }
+
+      function render() {
+        const c = counts()
+        document.getElementById('c-inbox').textContent = c.inbox
+        document.getElementById('c-unread').textContent = c.unread
+        document.getElementById('c-read').textContent = c.read
+        document.getElementById('c-fav').textContent = c.favorite
+        document.getElementById('c-arch').textContent = c.archived
+        document.getElementById('filter-label').textContent = LABELS[filter] || ''
+
+        document.querySelectorAll('.side button[data-filter]').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-filter') === filter)
+        })
+
+        const list = document.getElementById('list')
+        const rows = visible()
+        if (!rows.length) {
+          list.innerHTML = '<li class="empty">队列为空。在上方粘贴链接即可保存。</li>'
+          return
+        }
+        list.innerHTML = rows.map(function (b) {
+          const readCls = b.status === 'read' ? ' status-dot read' : ' status-dot'
+          const star = b.favorite ? '★' : '☆'
+          const arch = b.archived ? '已归档' : (b.status === 'read' ? '已读' : '未读')
+          return (
+            '<li class="row" data-id="' + b.id + '">' +
+              '<div class="' + readCls + '" aria-hidden="true"></div>' +
+              '<div>' +
+                '<p class="row-title"><a href="' + esc(b.url) + '" target="_blank" rel="noreferrer">' + esc(b.title) + '</a></p>' +
+                '<div class="row-meta"><span>' + esc(b.host) + '</span><span>' + arch + '</span></div>' +
+              '</div>' +
+              '<div class="row-actions">' +
+                '<button type="button" data-act="fav" class="' + (b.favorite ? 'on' : '') + '" title="收藏" aria-label="收藏">' + star + '</button>' +
+                '<button type="button" data-act="read" title="切换已读" aria-label="切换已读">R</button>' +
+                '<button type="button" data-act="arch" title="归档" aria-label="归档">A</button>' +
+                '<button type="button" data-act="del" title="删除" aria-label="删除">X</button>' +
+              '</div>' +
+            '</li>'
+          )
+        }).join('')
+      }
+
+      document.getElementById('add-form').addEventListener('submit', function (e) {
+        e.preventDefault()
+        const input = document.getElementById('url')
+        const url = normalize(input.value)
+        if (!url) {
+          input.focus()
+          return
+        }
+        const host = hostOf(url)
+        items.unshift({
+          id: Date.now(),
+          url: url,
+          title: titleOf(url, host),
+          host: host,
           status: 'unread',
-          favorite: true,
-          archived: false,
-          createdAt: Date.now() - 3000,
-        },
-        {
-          id: Date.now() - 2000,
-          url: 'https://vuejs.org/guide/introduction.html',
-          host: 'vuejs.org',
-          title: 'Vue.js Introduction',
-          status: 'read',
           favorite: false,
           archived: false,
-          createdAt: Date.now() - 2000,
-        },
-        {
-          id: Date.now() - 1000,
-          url: 'https://spring.io/projects/spring-boot',
-          host: 'spring.io',
-          title: 'Spring Boot',
-          status: 'unread',
-          favorite: false,
-          archived: true,
-          createdAt: Date.now() - 1000,
-        },
-      ]
-      save()
-    }
-    render()
+          at: Date.now(),
+        })
+        persist()
+        input.value = ''
+        filter = 'inbox'
+        render()
+      })
+
+      document.querySelector('.side').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-filter]')
+        if (!btn) return
+        filter = btn.getAttribute('data-filter')
+        render()
+      })
+
+      document.getElementById('q').addEventListener('input', function (e) {
+        q = e.target.value
+        render()
+      })
+
+      document.getElementById('list').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-act]')
+        if (!btn) return
+        const li = btn.closest('[data-id]')
+        if (!li) return
+        const id = Number(li.getAttribute('data-id'))
+        const item = items.filter(function (b) { return b.id === id })[0]
+        if (!item) return
+        const act = btn.getAttribute('data-act')
+        if (act === 'fav') item.favorite = !item.favorite
+        if (act === 'read') item.status = item.status === 'read' ? 'unread' : 'read'
+        if (act === 'arch') item.archived = !item.archived
+        if (act === 'del') items = items.filter(function (b) { return b.id !== id })
+        persist()
+        render()
+      })
+
+      if (!localStorage.getItem(KEY)) persist()
+      render()
+    })()
   </script>
 </body>
 </html>
