@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Linkstash — 自托管稍后读</title>
-  <meta name="description" content="Linkstash 是开源的自托管稍后读与书签库：保存网页、管理阅读队列、标签检索，多用户数据隔离。" />
+  <title>Linkstash — 稍后读与书签库</title>
+  <meta name="description" content="Linkstash 是开源的稍后读与书签库。保存网页，管理阅读队列，支持标签与检索，可部署在自有服务器。" />
   <style>
     :root {
       --ink: #1a1a18;
@@ -100,7 +100,7 @@
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
       gap: 48px;
       align-items: start;
       padding-bottom: 48px;
@@ -120,17 +120,18 @@
     }
     h1 {
       font-family: var(--font-display);
-      font-size: clamp(34px, 5vw, 48px);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
+      font-size: clamp(36px, 5vw, 52px);
+      line-height: 1.18;
+      letter-spacing: -0.025em;
       font-weight: 600;
       margin: 0 0 18px;
+      max-width: 8em;
     }
     .lede {
       margin: 0 0 28px;
       color: var(--muted);
       font-size: 15.5px;
-      max-width: 36em;
+      max-width: 34em;
     }
     .actions {
       display: flex;
@@ -186,7 +187,6 @@
       color: var(--ink);
     }
 
-    /* Product window — signature */
     .window {
       background: var(--sheet);
       border: 1px solid var(--rule-strong);
@@ -305,7 +305,6 @@
       cursor: pointer;
     }
     .compose button:hover { filter: brightness(1.08); }
-    .compose button:disabled { opacity: 0.55; cursor: not-allowed; }
 
     .toolbar {
       display: flex;
@@ -356,9 +355,7 @@
       letter-spacing: -0.01em;
       line-height: 1.35;
     }
-    .row-title a {
-      text-decoration: none;
-    }
+    .row-title a { text-decoration: none; }
     .row-title a:hover { color: var(--accent); }
     .row-meta {
       margin-top: 4px;
@@ -399,21 +396,6 @@
       font-size: 13px;
     }
 
-    .note {
-      margin-top: 14px;
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-    .note code {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      background: var(--sheet);
-      border: 1px solid var(--rule);
-      border-radius: 3px;
-      padding: 1px 5px;
-    }
-
-    /* Spec sheet */
     .section {
       padding: 48px 0 8px;
     }
@@ -521,7 +503,7 @@
     .close p {
       margin: 0;
       color: var(--muted);
-      max-width: 36em;
+      max-width: 34em;
       font-size: 14.5px;
     }
     footer {
@@ -550,7 +532,7 @@
       </a>
       <nav class="nav">
         <a href="#capabilities">能力</a>
-        <a href="#runtime">运行时</a>
+        <a href="#runtime">技术规格</a>
         <a href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">GitHub</a>
         <a class="cta" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">部署说明</a>
       </nav>
@@ -560,23 +542,23 @@
   <div class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Self-hosted reading queue</p>
-        <h1>稍后读，放在<br />你自己的机器上</h1>
+        <p class="eyebrow">Open source · Self-hosted</p>
+        <h1>稍后读与书签库</h1>
         <p class="lede">
-          Linkstash 保存网页链接，提取标题与摘要，按状态与标签管理阅读队列。
-          开源、多用户隔离，数据落在单个 SQLite 文件里，不经过第三方稍后读服务。
+          保存网页，整理阅读队列。支持标签、检索与多用户，
+          可部署在自己的服务器上，数据完全由你保管。
         </p>
         <div class="actions">
           <a class="btn" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">查看源码</a>
           <a class="btn btn-ghost" href="https://github.com/kafeiq19/linkstash#quick-start" target="_blank" rel="noreferrer">本地启动</a>
         </div>
         <dl class="facts">
-          <dt>部署</dt>
-          <dd>自有服务器 / 内网主机</dd>
+          <dt>形态</dt>
+          <dd>Web 应用，前后端分离</dd>
           <dt>数据</dt>
-          <dd>SQLite 单文件，可备份可迁移</dd>
+          <dd>SQLite 单文件，可备份迁移</dd>
           <dt>账号</dt>
-          <dd>注册登录，按用户隔离</dd>
+          <dd>注册登录，数据按用户隔离</dd>
         </dl>
       </div>
 
@@ -584,7 +566,7 @@
         <div class="window" id="app">
           <div class="window-chrome">
             <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-            <div class="window-title">LINKSTASH — LOCAL PREVIEW</div>
+            <div class="window-title">LINKSTASH — INBOX</div>
           </div>
           <div class="window-body">
             <aside class="side">
@@ -597,49 +579,45 @@
             </aside>
             <div class="main">
               <form class="compose" id="add-form" autocomplete="off">
-                <input id="url" type="text" inputmode="url" placeholder="粘贴 URL 保存到收件箱" aria-label="URL" />
-                <button type="submit" id="save-btn">保存</button>
+                <input id="url" type="text" inputmode="url" placeholder="粘贴链接，保存到收件箱" aria-label="链接" />
+                <button type="submit">保存</button>
               </form>
               <div class="toolbar">
                 <span class="window-title" id="filter-label">INBOX</span>
-                <input id="q" type="search" placeholder="搜索" aria-label="搜索书签" />
+                <input id="q" type="search" placeholder="搜索标题或域名" aria-label="搜索" />
               </div>
               <ul class="list" id="list"></ul>
             </div>
           </div>
         </div>
-        <p class="note">
-          右侧为本机演示：数据写入浏览器 <code>localStorage</code>，可当作草稿收件箱使用。
-          完整服务端（抓取元数据、账号、标签）见仓库 <code>backend/</code>。
-        </p>
       </div>
     </section>
 
     <section class="section" id="capabilities">
       <div class="section-head">
-        <h2>产品能力</h2>
+        <h2>能力</h2>
         <span>Capabilities</span>
       </div>
       <ol class="rows">
         <li class="spec-row">
           <div class="spec-num">01</div>
           <h3 class="spec-title">保存</h3>
-          <p class="spec-body">粘贴 URL 入库。服务端异步抓取 Open Graph / 标题 / 站点图标；抓取失败不影响保存，队列先建立。</p>
+          <p class="spec-body">粘贴链接即可入库，自动抓取标题、摘要与站点图标。网络失败时仍保留原始链接，不影响入库。</p>
         </li>
         <li class="spec-row">
           <div class="spec-num">02</div>
           <h3 class="spec-title">队列</h3>
-          <p class="spec-body">未读、已读、归档、收藏四种状态。收件箱默认只含未读与已读，归档单独存放，避免列表被旧链接淹没。</p>
+          <p class="spec-body">未读、已读、归档与收藏。收件箱只显示待处理内容，归档条目单独存放。</p>
         </li>
         <li class="spec-row">
           <div class="spec-num">03</div>
           <h3 class="spec-title">检索</h3>
-          <p class="spec-body">按标题、摘要、URL 关键词搜索，按标签名筛选。标签同用户唯一，删除标签仅解除关联，不误删书签。</p>
+          <p class="spec-body">按标题、摘要、链接搜索，按标签筛选。标签在用户内唯一，删除标签不会影响书签本身。</p>
         </li>
         <li class="spec-row">
           <div class="spec-num">04</div>
           <h3 class="spec-title">账号</h3>
-          <p class="spec-body">注册 / 登录，JWT（HS256）鉴权。书签与标签按 <code>user_id</code> 隔离，越权访问一律按不存在处理。</p>
+          <p class="spec-body">支持多用户注册登录。每人只能访问自己的书签与标签，越权请求一律拒绝。</p>
         </li>
       </ol>
     </section>
@@ -657,19 +635,15 @@
           </tr>
           <tr>
             <th>后端</th>
-            <td>Java 17 · Spring Boot 3 · MyBatis-Plus · sqlite-jdbc</td>
+            <td>Java 17 · Spring Boot 3 · MyBatis-Plus · SQLite</td>
           </tr>
           <tr>
             <th>鉴权</th>
-            <td>注册登录 · BCrypt · JWT HS256 · 默认 7 天</td>
-          </tr>
-          <tr>
-            <th>元数据</th>
-            <td>Jsoup 异步抓取 · 超时 5 秒 · 失败降级为原始 URL</td>
+            <td>JWT · 密码哈希存储 · 可配置有效期</td>
           </tr>
           <tr>
             <th>许可</th>
-            <td>MIT · Author <a href="https://github.com/kafeiq19" target="_blank" rel="noreferrer">@kafeiq19</a></td>
+            <td>MIT · 作者 <a href="https://github.com/kafeiq19" target="_blank" rel="noreferrer">@kafeiq19</a></td>
           </tr>
         </tbody>
       </table>
@@ -677,16 +651,16 @@
 
     <section class="close">
       <div>
-        <h2>源码在 GitHub</h2>
-        <p>静态页可直接托管；完整 API 与 SQLite 需要你的 Java 运行环境。启动步骤见 README。</p>
+        <h2>获取源码</h2>
+        <p>完整应用包含前端与 API 服务，部署步骤见仓库 README。</p>
       </div>
       <div class="actions" style="margin:0">
-        <a class="btn" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">kafeiq19/linkstash</a>
+        <a class="btn" href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">github.com/kafeiq19/linkstash</a>
       </div>
     </section>
 
     <footer>
-      <span>LINKSTASH · SELF-HOSTED READING QUEUE</span>
+      <span>LINKSTASH</span>
       <span><a href="https://github.com/kafeiq19/linkstash" target="_blank" rel="noreferrer">GITHUB</a> · MIT</span>
     </footer>
   </div>
@@ -789,7 +763,7 @@
       function visible() {
         const needle = q.trim().toLowerCase()
         return items.filter(function (b) {
-          if (filter === 'inbox' && (b.archived || false)) return false
+          if (filter === 'inbox' && b.archived) return false
           if (filter === 'unread' && (b.archived || b.status !== 'unread')) return false
           if (filter === 'read' && (b.archived || b.status !== 'read')) return false
           if (filter === 'favorite' && (!b.favorite || b.archived)) return false
@@ -831,16 +805,16 @@
         const list = document.getElementById('list')
         const rows = visible()
         if (!rows.length) {
-          list.innerHTML = '<li class="empty">队列为空。在上方粘贴链接即可保存。</li>'
+          list.innerHTML = '<li class="empty">暂无内容</li>'
           return
         }
         list.innerHTML = rows.map(function (b) {
-          const readCls = b.status === 'read' ? ' status-dot read' : ' status-dot'
+          const dot = b.status === 'read' ? 'status-dot read' : 'status-dot'
           const star = b.favorite ? '★' : '☆'
           const arch = b.archived ? '已归档' : (b.status === 'read' ? '已读' : '未读')
           return (
             '<li class="row" data-id="' + b.id + '">' +
-              '<div class="' + readCls + '" aria-hidden="true"></div>' +
+              '<div class="' + dot + '" aria-hidden="true"></div>' +
               '<div>' +
                 '<p class="row-title"><a href="' + esc(b.url) + '" target="_blank" rel="noreferrer">' + esc(b.title) + '</a></p>' +
                 '<div class="row-meta"><span>' + esc(b.host) + '</span><span>' + arch + '</span></div>' +
